@@ -1,30 +1,18 @@
-# SCAMShield — Starter MVP (Local-First)
+﻿# ScamShield – mini pipeline (train → predict → metrics)
 
-A tiny, working prototype that scores **texts and URLs** for phishing/scam risk and
-explains *why* it flagged them. Built to be extremely lightweight and deployable in minutes.
+(# ScamShield – mini pipeline (train → predict → metrics)
 
-## What’s inside
-- **Streamlit app** (`app/main.py`) — paste text or a URL to get a **risk score (0–100)** and human explanations.
-- **Heuristics engine** (`scamshield/scorer.py`) — urgency wording, OTP/$$ markers, brand impersonation, look‑alike domains, suspicious TLDs.
-- **URL helpers** (`scamshield/url_utils.py`) — normalization, domain distance, basic homograph defense.
-- **Chrome extension skeleton** (`extension/`) — a ready popup/manifest to later hit a tiny API.
-- **Data** (`data/sample_texts.txt`) — quick messages to test.
+## 1) Prérequis
+- Python 3.12+
+- Windows PowerShell
+- Ce repo contient 3 scripts :
+  - `train_calibrate.py` : entraîne et calibre le modèle
+  - `predict_csv.py`     : score un CSV (sort une colonne `proba` + `pred`)
+  - `metrics_csv.py`     : calcule AUC / PR-AUC + métriques par seuil
 
-## Run locally
-```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+## 2) Installation rapide
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-streamlit run app/main.py
-```
-
-## Deploy to Hugging Face Spaces
-- Create a new Space (type **Streamlit**), upload this repo, let it build.
-- Optionally pin Space hardware to CPU Basic (free tier).
-
-## Roadmap (very short-term)
-- OCR pipeline (images → text): Tesseract/EasyOCR → `score_text`.
-- API (FastAPI): `/score-text`, `/score-url` for the browser extension.
-- Report generator (PDF) from the Streamlit result page.
-- Feedback button to tune weights continuously.
-
-> ⚠️ Prototype only — heuristics are explainable and fast, not a substitute for full enterprise detection.
+)

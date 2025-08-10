@@ -1,0 +1,32 @@
+text,label,proba,pred
+On d?ploie en pr?prod cet apr?s-midi.,1,0.3512614315461504,0
++44 20 7946 0958,0,0.7268429223887897,1
+"Votre colis a ?t? livr?, voir le suivi dans votre espace client.",1,0.5679908806581465,0
+0899 12 34 56,0,0.8499284814196654,1
+"[LEGIT] Hi Alex, here is the Zoom link for 3pm. No rush.",0,0.7352442891456461,1
+[LEGIT] Invoice attached from our usual vendor (same IBAN). Call me if needed.,0,0.735244289145646,1
+"Caf? d??quipe jeudi 10h, salle A2.",1,0.03526578511682088,0
+Rappel: rendez-vous m?decin lundi 15h.,1,0.04761876221589845,0
+[SCAM] URGENT: Your bank account will be closed in 3 hours. Verify now: http://secure-bànk-support.com/login,0,0.43008356176054174,0
+Alerte : connexion depuis un nouvel appareil. Validez votre identité.,0,0.7653674581195775,1
+"Rappel : votre facture EDF est impayée, réglez immédiatement.",0,0.580439718321263,0
+0810 00 00 00,0,0.6844725755048319,1
+"Votre TVA n’a pas été réglée, pénalité immédiate si inaction.",0,0.7664458314359491,1
++33 7 56 12 34 56,0,0.8614229350262168,1
+[SCAM] Congratulations! You won 1000€ Amazon gift card. Claim: http://amàzon-prize.win,0,0.43008356176054174,0
+Facture r?gl?e. Merci pour votre confiance.,1,0.7162938781379959,1
+"Félicitations ! Vous avez gagné un iPhone 15, répondez vite pour le recevoir.",0,0.7365556601573274,1
+Message de votre banque : connexion suspecte détectée.,0,0.5281222847406303,0
+"Confirmation d'inscription au webinaire, lien ci-joint.",1,0.03526578511682088,0
+"Mise à jour de sécurité obligatoire, connectez-vous à votre espace.",0,0.6470580256592051,1
+"Bonjour, voici le compte-rendu de la r?union d'hier.",1,0.04236058118418351,0
+CR hebdo: objectifs atteints ? 92 %.,1,0.03526578511682088,0
+appelez le,0,0.2510988900222084,0
+Note interne: mise ? jour des cong?s dans le SIRH.,1,0.042907800695574205,0
+rappel immdiat,0,0.6566826157701339,1
+Votre compte bancaire a été suspendu. Cliquez ici pour le réactiver.,0,0.7527550200231226,1
+[SCAM] Code OTP 431992 – Do not share with anyone (reply to confirm).,0,0.7268429223887897,1
++33 9 70 00 00 00,0,0.7413204671415033,1
+Relev?s disponibles sur l?appli. Aucun incident.,1,0.03526578511682088,0
+numro surtax,0,0.3512614315461504,0
+"Votre colis est retenu. Payez 2,99€ pour la livraison.",0,0.7526415037080209,1

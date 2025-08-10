@@ -1,10 +1,6 @@
 ﻿.venv/
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
 *.log
 *.zip
-.scamshield_clean/
-scamshield_clean/
-scamshield_backup/
+# garde les modèles et données
