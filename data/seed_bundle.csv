@@ -1,0 +1,112 @@
+list_key;value
+sample_texts;Alerte : connexion depuis un nouvel appareil. Validez votre identité.
+sample_texts;Félicitations ! Vous avez gagné un iPhone 15, répondez vite pour le recevoir.
+sample_texts;Message de votre banque : connexion suspecte détectée.
+sample_texts;Mise à jour de sécurité obligatoire, connectez-vous à votre espace.
+sample_texts;Rappel : votre facture EDF est impayée, réglez immédiatement.
+sample_texts;Votre TVA n’a pas été réglée, pénalité immédiate si inaction.
+sample_texts;Votre colis est retenu. Payez 2,99€ pour la livraison.
+sample_texts;Votre compte bancaire a été suspendu. Cliquez ici pour le réactiver.
+sample_texts;[LEGIT] Hi Alex, here is the Zoom link for 3pm. No rush.
+sample_texts;[LEGIT] Invoice attached from our usual vendor (same IBAN). Call me if needed.
+sample_texts;[SCAM] Code OTP 431992 – Do not share with anyone (reply to confirm).
+sample_texts;[SCAM] Congratulations! You won 1000€ Amazon gift card. Claim: http://amàzon-prize.win
+sample_texts;[SCAM] URGENT: Your bank account will be closed in 3 hours. Verify now: http://secure-bànk-support.com/login
+trusted_senders;contact@edf.fr
+trusted_senders;contact@service-public.fr
+trusted_senders;help@airfrance.fr
+trusted_senders;no-reply@amazon.fr
+trusted_senders;noreply@impots.gouv.fr
+trusted_senders;notifications@paypal.com
+trusted_senders;service-client@amazon.fr
+trusted_senders;support@banquepopulaire.fr
+trusted_senders;support@paypal.com
+malicious_senders;appleid@support-apple-security.com
+malicious_senders;billing@amaz0n-help.com
+malicious_senders;comptabilite@impots-gouv.fr.com
+malicious_senders;delivery@fakecolis.cn
+malicious_senders;edf-facture@dangerousmail.ru
+malicious_senders;secure-paypal@fraud.com
+malicious_senders;security@banquepopulaire-support.net
+malicious_senders;sfr@facturation-suspendue.net
+malicious_senders;support-client@amaz0n.net
+malicious_senders;support@paypal-secure.co
+malicious_senders;update@impots-g0uv.fr
+blocked_domains;amaz0n-help.com
+blocked_domains;amaz0n.net
+blocked_domains;banquepopulaire-support.net
+blocked_domains;bit.ly
+blocked_domains;fakecolis.cn
+blocked_domains;fraud.com
+blocked_domains;impots-g0uv.fr
+blocked_domains;impots-gouv.fr.com
+blocked_domains;paypal-secure.co
+blocked_domains;paypal-verif.net
+blocked_domains;phishing-mail.ru
+blocked_domains;secure-amazon-login.org
+blocked_domains;short.ly
+blocked_domains;tiny.cc
+denylist_phrases;cliquez ici
+denylist_phrases;cliquez ici pour valider
+denylist_phrases;confirmez votre mot de passe
+denylist_phrases;crypto
+denylist_phrases;iban
+denylist_phrases;immdiat
+denylist_phrases;mise jour de scurit
+denylist_phrases;mise à jour urgente
+denylist_phrases;paiement en attente
+denylist_phrases;paiement non reçu
+denylist_phrases;phrase de rcupration
+denylist_phrases;pénalité immédiate
+denylist_phrases;seed phrase
+denylist_phrases;suspendu
+denylist_phrases;urgent
+denylist_phrases;verifiez votre identit
+denylist_phrases;virement
+denylist_phrases;virement instantané requis
+denylist_phrases;votre compte sera suspendu
+denylist_phrases;vérifiez votre identité
+allowlist_phrases;aucun paiement nest demand
+allowlist_phrases;cet email est purement informatif
+allowlist_phrases;facture disponible dans votre espace client
+allowlist_phrases;merci de votre confiance
+allowlist_phrases;ne jamais communiquer votre mot de passe
+allowlist_phrases;votre commande a été expédiée
+allowlist_phrases;vous pouvez grer depuis votre compte officiel
+phone_scam_patterns;+33 7 56 12 34 56
+phone_scam_patterns;+33 9 70 00 00 00
+phone_scam_patterns;+44 20 7946 0958
+phone_scam_patterns;0810 00 00 00
+phone_scam_patterns;0899 12 34 56
+phone_scam_patterns;appelez le
+phone_scam_patterns;numro surtax
+phone_scam_patterns;rappel immdiat
+suspicious_attachments;.apk
+suspicious_attachments;.bat
+suspicious_attachments;.cmd
+suspicious_attachments;.docm
+suspicious_attachments;.exe
+suspicious_attachments;.hta
+suspicious_attachments;.htm
+suspicious_attachments;.html
+suspicious_attachments;.jar
+suspicious_attachments;.js
+suspicious_attachments;.lnk
+suspicious_attachments;.ps1
+suspicious_attachments;.rar
+suspicious_attachments;.scr
+suspicious_attachments;.vbs
+suspicious_attachments;.xlsm
+suspicious_attachments;.zip
+suspicious_tlds;.click
+suspicious_tlds;.cn
+suspicious_tlds;.co
+suspicious_tlds;.ga
+suspicious_tlds;.icu
+suspicious_tlds;.link
+suspicious_tlds;.live
+suspicious_tlds;.ml
+suspicious_tlds;.ru
+suspicious_tlds;.tk
+suspicious_tlds;.top
+suspicious_tlds;.xyz

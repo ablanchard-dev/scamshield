@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SCAMShield</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:16px;width:320px}
+    h1{font-size:16px;margin:0 0 12px}
+    textarea{width:100%;height:120px}
+    button{margin-top:8px}
+    .hint{color:#666;font-size:12px;margin-top:8px}
+  </style>
+</head>
+<body>
+  <h1>SCAMShield — Text Check</h1>
+  <textarea id="msg" placeholder="Paste text to check…"></textarea>
+  <button id="check">Score locally (coming soon)</button>
+  <div class="hint">Later: this will call your local API: <code>POST /score-text</code></div>
+  <script src="popup.js"></script>
+</body>
+</html>

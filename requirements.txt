@@ -1,0 +1,2 @@
+streamlit==1.36.0
+tldextract==5.1.2

@@ -1,0 +1,12 @@
+.click
+.cn
+.co
+.ga
+.icu
+.link
+.live
+.ml
+.ru
+.tk
+.top
+.xyz

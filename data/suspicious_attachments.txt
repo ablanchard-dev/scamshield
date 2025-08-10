@@ -1,0 +1,17 @@
+.apk
+.bat
+.cmd
+.docm
+.exe
+.hta
+.htm
+.html
+.jar
+.js
+.lnk
+.ps1
+.rar
+.scr
+.vbs
+.xlsm
+.zip
