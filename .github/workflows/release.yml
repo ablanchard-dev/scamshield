@@ -1,0 +1,39 @@
+﻿name: Release on tag
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  package-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare names
+        run: |
+          echo "APP=scamshield" >> $GITHUB_ENV
+          echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Create archives (zip & tar.gz)
+        run: |
+          mkdir -p dist
+          zip -r "dist/${APP}-${TAG}.zip" . \
+            -x ".git/*" ".venv/*" "__pycache__/*" "htmlcov/*" ".pytest_cache/*" \
+               "models/*.joblib" "models/*.pkl" "data/*"
+          tar --exclude-vcs --exclude='.venv' --exclude='__pycache__' \
+              --exclude='htmlcov' --exclude='.pytest_cache' \
+              --exclude='models/*.joblib' --exclude='models/*.pkl' \
+              --exclude='data/*' \
+              -czf "dist/${APP}-${TAG}.tar.gz" .
+
+      - name: Create GitHub Release + attach assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.zip
+            dist/*.tar.gz
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
