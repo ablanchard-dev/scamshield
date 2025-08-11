@@ -1,18 +1,22 @@
-﻿# ScamShield – mini pipeline (train → predict → metrics)
+﻿# SCAMShield – mini pipeline (train → predict → metrics) + app Streamlit
+![CI](https://github.com/blanchardalexaytrongood-cmd/scamshield/actions/workflows/ci.yml/badge.svg?branch=dev)
 
-(# ScamShield – mini pipeline (train → predict → metrics)
+Prototype SCAMShield texte : entraînement, prédiction, métriques + interface Streamlit.
 
 ## 1) Prérequis
-- Python 3.12+
-- Windows PowerShell
-- Ce repo contient 3 scripts :
-  - `train_calibrate.py` : entraîne et calibre le modèle
-  - `predict_csv.py`     : score un CSV (sort une colonne `proba` + `pred`)
-  - `metrics_csv.py`     : calcule AUC / PR-AUC + métriques par seuil
+- **Windows + PowerShell**
+- **Python 3.12+**
+- Git (pour la CI GitHub)
 
 ## 2) Installation rapide
 ```powershell
+# Cloner (si besoin)
+# git clone https://github.com/<votre-user>/scamshield.git
+cd scamshield
+
+# Créer/activer l'environnement
 python -m venv .venv
-.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
+
+# Dépendances
 pip install -r requirements.txt
-)
