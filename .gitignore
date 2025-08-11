@@ -4,3 +4,6 @@ __pycache__/
 *.log
 *.zip
 # garde les modèles et données
+data/*.csv
+models/*.joblib
+models/train_log.txt
