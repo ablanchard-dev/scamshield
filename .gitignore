@@ -7,3 +7,5 @@ __pycache__/
 data/*.csv
 models/*.joblib
 models/train_log.txt
+
+.coverage

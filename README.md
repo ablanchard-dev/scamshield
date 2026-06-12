@@ -1,5 +1,5 @@
 ﻿# SCAMShield – mini pipeline (train → predict → metrics) + app Streamlit
-![CI](https://github.com/blanchardalexaytrongood-cmd/scamshield/actions/workflows/ci.yml/badge.svg?branch=dev)
+![CI](https://github.com/ablanchard-dev/scamshield/actions/workflows/ci.yml/badge.svg?branch=main)
 
 Prototype SCAMShield texte : entraînement, prédiction, métriques + interface Streamlit.
 
