@@ -233,7 +233,9 @@ def build(n_per_scam=27, n_per_ham=49, n_hard=55):
     random.seed(SEED)
     scam = _fill(SCAM_GENS, n_per_scam) | _fill([hard_scam], n_hard)
     ham = _fill(HAM_GENS, n_per_ham) | _fill([hard_ham], n_hard)
-    rows = [(t, 1) for t in scam] + [(t, 0) for t in ham]
+    # sort before shuffling so the seeded shuffle is byte-reproducible
+    # (set iteration order is not stable across runs).
+    rows = [(t, 1) for t in sorted(scam)] + [(t, 0) for t in sorted(ham)]
     random.shuffle(rows)
     return rows
 

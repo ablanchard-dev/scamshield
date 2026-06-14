@@ -39,7 +39,8 @@ const KW = {
     "identifiant", "se connecter", "vérifier votre compte", "code reçu",
     "16 chiffres", "pièce d'identité"],
   money: ["paiement", "virement", "remboursement", "facture", "iban", "crypto",
-    "bitcoin", "frais", "taxe", "amende", "régler", "western union", "carte cadeau"],
+    "bitcoin", "ethereum", "frais", "taxe", "amende", "droit", "règlement",
+    "régler", "western union", "carte cadeau"],
 };
 
 const has = (t, list) => list.some((k) => t.includes(k));
@@ -86,7 +87,7 @@ export function scoreText(text) {
   if (cred) add(WEIGHTS.credential_request, "Demande d'identifiants / code", "high");
   if (money) add(WEIGHTS.financial_request, "Demande financière", "high");
   if (urg && cred) add(WEIGHTS.synergy_urgent_cred, "Combo urgence + identifiants", "high");
-  if ((urg || time) && (money || RE.iban.test(text) || RE.btc.test(text)))
+  if ((urg || time) && (money || RE.iban.test(text) || RE.btc.test(text) || RE.amount.test(text)))
     add(WEIGHTS.synergy_money_time, "Combo pression + argent", "high");
 
   // Hard signals
