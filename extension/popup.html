@@ -1,21 +1,117 @@
 <!doctype html>
-<html>
+<html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <title>SCAMShield</title>
-  <style>
-    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:16px;width:320px}
-    h1{font-size:16px;margin:0 0 12px}
-    textarea{width:100%;height:120px}
-    button{margin-top:8px}
-    .hint{color:#666;font-size:12px;margin-top:8px}
-  </style>
+<meta charset="utf-8">
+<title>SCAMShield</title>
+<style>
+  :root {
+    --bg: #0F172A; --surface: #131C31; --muted: #1E293B; --border: #334155;
+    --fg: #F8FAFC; --dim: #94A3B8;
+    --amber: #F59E0B; --green: #22C55E; --red: #EF4444;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; width: 360px; background: var(--bg); color: var(--fg);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px; line-height: 1.5;
+  }
+  .wrap { padding: 16px; }
+  header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .mark {
+    width: 32px; height: 32px; border-radius: 9px; flex: none;
+    background: linear-gradient(180deg, #1E293B, #0B1220);
+    border: 1px solid var(--border); display: grid; place-items: center;
+  }
+  h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+  .sub { color: var(--dim); font-size: 11px; margin: 1px 0 0; }
+  label { display: block; font-size: 11px; font-weight: 600; color: var(--dim);
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  textarea {
+    width: 100%; height: 104px; resize: vertical; padding: 10px 12px;
+    background: var(--muted); color: var(--fg); border: 1px solid var(--border);
+    border-radius: var(--radius); font: inherit; outline: none;
+  }
+  textarea:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,.18); }
+  textarea::placeholder { color: #64748B; }
+  button {
+    width: 100%; margin-top: 12px; padding: 11px 14px; border: 0; cursor: pointer;
+    background: var(--amber); color: #0F172A; font: inherit; font-weight: 700;
+    border-radius: var(--radius); letter-spacing: .01em;
+    transition: filter .15s ease, transform .05s ease;
+  }
+  button:hover { filter: brightness(1.06); }
+  button:active { transform: translateY(1px); }
+  button:focus-visible { outline: 3px solid rgba(245,158,11,.5); outline-offset: 2px; }
+
+  .result { margin-top: 16px; display: none; }
+  .result.show { display: block; animation: rise .2s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+  @media (prefers-reduced-motion: reduce) { .result.show { animation: none; } }
+
+  .scorerow { display: flex; align-items: baseline; gap: 10px; }
+  .score { font-size: 40px; font-weight: 700; letter-spacing: -.03em;
+    font-variant-numeric: tabular-nums; line-height: 1; }
+  .score small { font-size: 16px; color: var(--dim); font-weight: 500; }
+  .badge { margin-left: auto; align-self: center; padding: 4px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+  .badge.safe  { background: rgba(34,197,94,.15);  color: #4ADE80; border: 1px solid rgba(34,197,94,.4); }
+  .badge.doubt { background: rgba(245,158,11,.15); color: var(--amber); border: 1px solid rgba(245,158,11,.4); }
+  .badge.risky { background: rgba(239,68,68,.15);  color: #F87171; border: 1px solid rgba(239,68,68,.4); }
+
+  .meter { position: relative; height: 8px; border-radius: 999px; margin: 12px 0 4px;
+    background: linear-gradient(90deg, var(--green) 0 25%, var(--amber) 25% 60%, var(--red) 60% 100%);
+    opacity: .85; }
+  .needle { position: absolute; top: -3px; width: 3px; height: 14px; border-radius: 2px;
+    background: var(--fg); box-shadow: 0 0 0 2px var(--bg); transition: left .35s cubic-bezier(.2,.8,.2,1); }
+  .ticks { display: flex; justify-content: space-between; color: var(--dim); font-size: 10px; }
+
+  .reasons { margin-top: 14px; list-style: none; padding: 0; }
+  .reasons li { display: flex; align-items: center; gap: 9px; padding: 7px 0;
+    border-top: 1px solid var(--border); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.high { background: var(--red); } .dot.med { background: var(--amber); }
+  .dot.low { background: var(--green); }
+  .empty { color: var(--dim); padding: 8px 0; }
+
+  footer { margin-top: 14px; display: flex; align-items: center; gap: 6px;
+    color: var(--dim); font-size: 11px; }
+  footer svg { flex: none; }
+</style>
 </head>
 <body>
-  <h1>SCAMShield — Text Check</h1>
-  <textarea id="msg" placeholder="Paste text to check…"></textarea>
-  <button id="check">Score locally (coming soon)</button>
-  <div class="hint">Later: this will call your local API: <code>POST /score-text</code></div>
-  <script src="popup.js"></script>
+  <div class="wrap">
+    <header>
+      <span class="mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l8 3v6c0 5-3.4 8.5-8 11-4.6-2.5-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/>
+        </svg>
+      </span>
+      <div>
+        <h1>SCAMShield</h1>
+        <p class="sub">Détecteur d'arnaque & phishing — analyse locale</p>
+      </div>
+    </header>
+
+    <label for="msg">Message à vérifier</label>
+    <textarea id="msg" placeholder="Collez un SMS ou un e-mail suspect…"></textarea>
+    <button id="check" type="button">Analyser</button>
+
+    <section class="result" id="result" aria-live="polite">
+      <div class="scorerow">
+        <div class="score"><span id="scoreNum">0</span><small>/100</small></div>
+        <span class="badge" id="badge"></span>
+      </div>
+      <div class="meter"><span class="needle" id="needle" style="left:0%"></span></div>
+      <div class="ticks"><span>Sûr</span><span>Douteux</span><span>Risqué</span></div>
+      <ul class="reasons" id="reasons"></ul>
+    </section>
+
+    <footer>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <span>100&nbsp;% local — rien n'est envoyé sur Internet.</span>
+    </footer>
+  </div>
+  <script type="module" src="popup.js"></script>
 </body>
 </html>
