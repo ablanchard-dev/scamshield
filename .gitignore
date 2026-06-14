@@ -3,8 +3,9 @@ __pycache__/
 *.pyc
 *.log
 *.zip
-# garde les modèles et données
+# Generated experiment CSVs stay out; the canonical benchmark is tracked.
 data/*.csv
+!data/dataset.csv
 models/*.joblib
 models/train_log.txt
 
