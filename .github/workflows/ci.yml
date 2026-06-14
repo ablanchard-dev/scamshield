@@ -30,6 +30,14 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
         run: pytest --maxfail=1 --disable-warnings -q --cov=scamshield --cov-report=xml --cov-report=html
+      - name: Data -> train -> eval pipeline
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python get_data.py
+          python train_calibrate.py --data data/sms_spam.csv --text-col text --label-col label
+          python make_dataset.py
+          python eval.py
       - name: Upload coverage artifact
         if: always()
         uses: actions/upload-artifact@v4
