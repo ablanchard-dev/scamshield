@@ -1,15 +1,10 @@
 ﻿# -*- coding: utf-8 -*-
 """
 Usage rapide (exemples) :
-  - Proba de la classe 1 (ex. SCAM) sans inversion :
+  - Proba de la classe 1 (SCAM) :
       python predict_csv.py --model models\scamshield_calibrated.joblib ^
-        --in data\norm_scam1.csv --text-col text ^
-        --out data\norm_scam1_scored.csv --threshold 0.6 --pos 1
-
-  - Proba de la classe 0 mais inversée (équivalent "proba classe 1") :
-      python predict_csv.py --model models\scamshield_calibrated.joblib ^
-        --in data\norm_scam1.csv --text-col text ^
-        --out data\norm_scam1_scored.csv --threshold 0.6 --pos 0 --invert
+        --in data\dataset.csv --text-col text ^
+        --out data\dataset_scored.csv --threshold 0.6 --pos 1
 """
 import argparse
 import numpy as np
