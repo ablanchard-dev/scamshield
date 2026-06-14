@@ -1,0 +1,25 @@
+{
+  "data": "data/sms_spam.csv",
+  "text_col": "text",
+  "label_col": "label",
+  "method": "sigmoid",
+  "analyzer": "both",
+  "min_df": 2,
+  "max_ngram": 2,
+  "char_min": 3,
+  "char_max": 5,
+  "max_features": null,
+  "class_weight": "balanced",
+  "label_mapping": {
+    "pos_label": "numeric>0.5"
+  },
+  "metrics": {
+    "auc": 0.9967980295566503,
+    "f1": 0.9636363636363636,
+    "precision": 0.9814814814814815,
+    "recall": 0.9464285714285714,
+    "brier": 0.0079281653571188,
+    "ece": 0.008761671725171848,
+    "logloss": 0.033352810087397655
+  }
+}

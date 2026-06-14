@@ -5,21 +5,26 @@ from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.calibration import CalibratedClassifierCV
-from sklearn.metrics import roc_auc_score, brier_score_loss, log_loss
+from sklearn.metrics import roc_auc_score, brier_score_loss, log_loss, precision_recall_fscore_support
 from joblib import dump
 
 def expected_calibration_error(y_true, p, n_bins=15):
-    # ECE simple (binning uniforme)
+    # Standard ECE: bin by confidence in the *predicted* class, then compare
+    # average confidence to average accuracy per bin. (The previous version
+    # compared raw P(class=1) to accuracy, which blows up on imbalanced data.)
+    y_true = np.asarray(y_true, dtype=int)
+    p = np.asarray(p, dtype=float)
+    pred = (p >= 0.5).astype(int)
+    conf = np.where(pred == 1, p, 1.0 - p)
+    correct = (pred == y_true).astype(float)
     bins = np.linspace(0.0, 1.0, n_bins + 1)
-    idx = np.digitize(p, bins) - 1
+    idx = np.clip(np.digitize(conf, bins) - 1, 0, n_bins - 1)
     ece = 0.0
     for b in range(n_bins):
         mask = idx == b
         if not np.any(mask):
             continue
-        conf = p[mask].mean()
-        acc = (y_true[mask] == (p[mask] >= 0.5)).mean()
-        ece += (mask.mean()) * abs(acc - conf)
+        ece += mask.mean() * abs(correct[mask].mean() - conf[mask].mean())
     return float(ece)
 
 def read_table(path, encoding=None):
@@ -94,10 +99,13 @@ def main(a):
     brier = brier_score_loss(y_te, p)
     ece = expected_calibration_error(y_te, p, n_bins=15)
     ll = log_loss(y_te, np.vstack([1-p, p]).T)
+    prec, rec, f1, _ = precision_recall_fscore_support(
+        y_te, (p >= 0.5).astype(int), average="binary", zero_division=0)
 
-    print(f"AUC   : {auc:.4f}")
-    print(f"Brier : {brier:.4f}")
-    print(f"ECE   : {ece:.4f}")
+    print(f"AUC    : {auc:.4f}")
+    print(f"F1     : {f1:.4f}  (precision {prec:.4f}, recall {rec:.4f})")
+    print(f"Brier  : {brier:.4f}")
+    print(f"ECE    : {ece:.4f}")
     print(f"LogLoss: {ll:.4f}")
 
     dump(cal, a.out)
@@ -114,11 +122,12 @@ def main(a):
         "max_features": a.max_features,
         "class_weight": a.class_weight,
         "label_mapping": meta_label,
-        "metrics": {"auc": auc, "brier": brier, "ece": ece, "logloss": ll}
+        "metrics": {"auc": auc, "f1": f1, "precision": prec, "recall": rec,
+                    "brier": brier, "ece": ece, "logloss": ll}
     }
     with open(os.path.splitext(a.out)[0] + ".meta.json", "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False, indent=2)
-    print("✅ Modèle calibré sauvegardé ->", a.out)
+    print("[OK] Calibrated model saved ->", a.out)
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()

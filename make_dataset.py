@@ -21,6 +21,7 @@ BANKS = ["votre banque", "la Société Générale", "le Crédit Agricole", "BNP 
 BRANDS = ["Amazon", "Netflix", "PayPal", "Microsoft", "Apple", "La Poste", "Chronopost", "DHL", "Free", "Orange"]
 ADMINS = ["les Impôts", "l'URSSAF", "l'Assurance Maladie (Ameli)", "la CAF", "la DGFiP", "le Trésor Public"]
 CARRIERS = ["La Poste", "Chronopost", "DHL", "Colissimo", "UPS"]
+PHONES = ["01 80 00 00 00", "09 70 80 90 00", "0 805 12 34 56", "01 57 32 48 11"]
 AMOUNTS = ["2,99€", "1,99€", "49€", "129€", "350€", "1000€", "9 500€"]
 LINKS = ["http://secure-{b}-verif.com", "http://{b}-support.win", "http://espace-{b}.co", "https://maj-{b}.info"]
 DELAYS = ["sous 24h", "avant minuit", "dans l'heure", "sous 48h", "immédiatement"]
@@ -185,6 +186,36 @@ def ham_newsletter():
 HAM_GENS = [ham_work, ham_perso, ham_legit_delivery, ham_legit_admin, ham_newsletter]
 
 
+# --- hard cases: realistic overlap so the benchmark isn't trivially separable
+def hard_scam():
+    """Subtle scams with no obvious phishing link — pure social engineering."""
+    b = random.choice(BANKS)
+    br = random.choice(BRANDS)
+    return random.choice([
+        f"Bonjour, c'est votre conseiller {b}. Pour valider l'opération, confirmez-moi le code reçu par SMS.",
+        f"Maman, j'ai cassé mon téléphone, voici mon nouveau numéro. Peux-tu régler une facture de {random.choice(AMOUNTS)} en urgence ? Je te rembourse vite.",
+        f"C'est ton responsable. Peux-tu acheter {random.randint(2,5)} cartes cadeaux {br} pour un client et m'envoyer les codes ? Je suis en réunion.",
+        f"Service après-vente {br} : un remboursement de {random.choice(AMOUNTS)} est en attente, rappelez le {random.choice(PHONES)} pour finaliser.",
+        "Suite à votre réclamation, donnez-moi les 16 chiffres de votre carte pour procéder au remboursement.",
+        f"Papa c'est moi, j'ai un nouveau numéro. J'ai un souci, peux-tu m'envoyer {random.choice(AMOUNTS)} par virement stp ?",
+    ])
+
+
+def hard_ham():
+    """Legitimate messages that *look* risky (money, urgency, link, OTP framing)."""
+    b = random.choice(BRANDS)
+    c = random.choice(CARRIERS)
+    return random.choice([
+        f"Code de connexion : {random.randint(100000,999999)}. Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.",
+        f"{c} : votre colis arrive aujourd'hui, suivez-le sur laposte.fr/suivi.",
+        f"Votre facture {b} de {random.choice(AMOUNTS)} est disponible, prélèvement le 5 du mois.",
+        f"{b} : une connexion a eu lieu depuis Paris. C'était vous ? Gérez vos appareils dans l'application.",
+        f"Rappel : il reste {random.choice(AMOUNTS)} à régler sur votre commande, le paiement se fait dans votre espace habituel.",
+        f"Votre banque : un paiement de {random.choice(AMOUNTS)} a été débité, retrouvez le détail dans l'application.",
+        f"Votre rendez-vous est confirmé. Un acompte de {random.choice(AMOUNTS)} sera demandé sur place.",
+    ])
+
+
 def _fill(gens, target):
     rows = set()
     for gen in gens:
@@ -198,10 +229,10 @@ def _fill(gens, target):
     return rows
 
 
-def build(n_per_scam=27, n_per_ham=49):
+def build(n_per_scam=27, n_per_ham=49, n_hard=55):
     random.seed(SEED)
-    scam = _fill(SCAM_GENS, n_per_scam)
-    ham = _fill(HAM_GENS, n_per_ham)
+    scam = _fill(SCAM_GENS, n_per_scam) | _fill([hard_scam], n_hard)
+    ham = _fill(HAM_GENS, n_per_ham) | _fill([hard_ham], n_hard)
     rows = [(t, 1) for t in scam] + [(t, 0) for t in ham]
     random.shuffle(rows)
     return rows
