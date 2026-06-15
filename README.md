@@ -78,8 +78,10 @@ streamlit run app/main.py                                          # web demo
 python -m scamshield.scorer --text "Votre colis est retenu, payez 2,99€ : http://exemple"
 ```
 
-A Chrome extension (`extension/`) runs a JavaScript port of this rule engine
-(`extension/scorer.js`), scoring entirely in the browser — no server, nothing sent.
+A Chrome extension (`extension/`) ships a lightweight browser re-implementation
+of the core rule-engine signals (`extension/scorer.js`) — a subset of the Python
+engine's signals, with its own hardcoded lists — scoring entirely in the browser,
+no server, nothing sent.
 
 ## Tests
 

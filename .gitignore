@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 *.log
 *.zip
+tree.txt
 # Generated experiment CSVs stay out; the canonical benchmark is tracked.
 data/*.csv
 !data/dataset.csv
