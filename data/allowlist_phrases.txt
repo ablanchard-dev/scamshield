@@ -1,7 +1,7 @@
-aucun paiement nest demand
+aucun paiement n'est demandé
 cet email est purement informatif
 facture disponible dans votre espace client
 merci de votre confiance
 ne jamais communiquer votre mot de passe
 votre commande a été expédiée
-vous pouvez grer depuis votre compte officiel
+vous pouvez gérer depuis votre compte officiel

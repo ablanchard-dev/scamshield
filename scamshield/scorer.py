@@ -1,4 +1,9 @@
-# scamshield/scorer.py — V1.8  (ajout support deepfake: audio/vidéo/voiceprint + --media-json)
+"""Explainable rule-based scam/phishing scorer.
+
+Sums weighted, transparent signals (risky/reassuring phrasings, domains, senders,
+urgency, credential/financial requests, IBAN/crypto, punycode, QR codes, optional
+media flags) and returns a 0-100 score with the list of reasons behind it.
+"""
 
 import re, json, os, unicodedata
 from typing import Tuple, List, Dict, Optional, Any
@@ -394,9 +399,9 @@ def score_text(text: str, media: Optional[Dict[str, Any]] = None) -> Tuple[float
 
     # Synergies
     if had_urgency and asks_cred:
-        score += WEIGHTS["synergy_urgent_cred"]; reasons.append("⚠️ Urgence + identifiants")
+        score += WEIGHTS["synergy_urgent_cred"]; reasons.append("Urgence + identifiants")
     if (had_urgency or had_time) and (asks_money or IBAN_REGEX.search(t) or BTC_REGEX.search(t) or _has_amount(t)):
-        score += WEIGHTS["synergy_money_time"]; reasons.append("⚠️ Pression + argent")
+        score += WEIGHTS["synergy_money_time"]; reasons.append("Pression + argent")
 
     # 5) IBAN & crypto & montants
     if FR_IBAN_HINT.search(t) or IBAN_REGEX.search(t):

@@ -5,6 +5,7 @@ from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.frozen import FrozenEstimator
 from sklearn.metrics import roc_auc_score, brier_score_loss, log_loss, precision_recall_fscore_support
 from joblib import dump
 
@@ -91,7 +92,7 @@ def main(a):
     ])
     base.fit(X_tr, y_tr)
 
-    cal = CalibratedClassifierCV(estimator=base, method=a.method, cv="prefit")
+    cal = CalibratedClassifierCV(FrozenEstimator(base), method=a.method)
     cal.fit(X_val, y_val)
 
     p = cal.predict_proba(X_te)[:, 1]

@@ -4,5 +4,5 @@
 0810 00 00 00
 0899 12 34 56
 appelez le
-numro surtax
-rappel immdiat
+numéro surtaxé
+rappel immédiat

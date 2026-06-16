@@ -3,17 +3,16 @@ cliquez ici pour valider
 confirmez votre mot de passe
 crypto
 iban
-immdiat
-mise jour de scurit
+immédiat
+mise à jour de sécurité
 mise à jour urgente
 paiement en attente
 paiement non reçu
-phrase de rcupration
+phrase de récupération
 pénalité immédiate
 seed phrase
 suspendu
 urgent
-verifiez votre identit
 virement
 virement instantané requis
 votre compte sera suspendu

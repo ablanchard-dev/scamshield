@@ -1,4 +1,6 @@
-// SCAMShield — local rule-based scorer (JS port of scamshield/scorer.py).
+// SCAMShield — local rule-based scorer: a browser subset re-implementation of
+// scamshield/scorer.py (a subset of the Python engine's signals).
+// The JS and Python signal lists are maintained separately.
 // Runs entirely in the browser. Nothing is sent anywhere.
 
 const WEIGHTS = {
