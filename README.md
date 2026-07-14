@@ -42,6 +42,20 @@ on the public **UCI SMS Spam Collection** (5,574 real messages, fetched by
 > about what it measures. The French benchmark is synthetic, so it validates the
 > rule engine's behaviour, not real-world accuracy.
 
+**Real-world spot-check** (`tests/test_realworld_battery.py`) — the shipped rule
+engine run against 11 varied, real-style French scams (bank, parcel, prize,
+sextortion, tech-support, tax, crypto, gift-card, relative-in-distress…) and 11
+plain legitimate messages:
+
+| Real scams flagged | Legit kept safe |
+|---|---|
+| 11 / 11 | 11 / 11 (no false positive) |
+
+> Small (n = 22) and hand-written, not a full benchmark — but unlike the synthetic
+> set these are realistic messages, so it is a truer signal of everyday behaviour.
+> Accent-insensitive matching (real SMS often drop accents) and per-category
+> signals drive it. Flagged messages are marked *to review*, never a hard verdict.
+
 ## Reproduce
 
 ```bash
