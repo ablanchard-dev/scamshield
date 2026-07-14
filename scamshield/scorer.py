@@ -147,31 +147,45 @@ def _extract_attachments(text: str) -> List[str]:
         found += pattern.findall(text)
     return list(set(found))
 
+def _norm(s: str) -> str:
+    # minuscule + sans accents : les vrais SMS/emails de scam arrivent souvent SANS accents
+    # (identite, immediat, felicitations...) et la detection ne doit pas les rater pour autant.
+    s = "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn")
+    return s.lower()
+
 def _count_occurrences(text: str, phrases: List[str]) -> int:
-    t = text.lower()
-    return sum(1 for p in phrases if p in t)
+    t = _norm(text)
+    return sum(1 for p in phrases if _norm(p) in t)
 
 def _has_urgency(text: str) -> bool:
-    t = text.lower()
-    keys = ["urgent", "immédiat", "immediat", "48h", "24h", "sans délai", "dernier avertissement", "compte suspendu"]
-    return any(k in t for k in keys)
+    t = _norm(text)
+    keys = ["urgent", "immediat", "48h", "24h", "sans delai", "dernier avertissement", "compte suspendu",
+            "sera suspendu", "sera desactive", "sera bloque", "sera coupe", "coupure", "a expire",
+            "derniere chance", "eviter la"]
+    return any(_norm(k) in t for k in keys)
 
 def _has_time_pressure(text: str) -> bool:
-    t = text.lower()
-    keys = ["aujourd'hui", "avant minuit", "dans l'heure", "sous 24h", "immédiatement"]
-    return any(k in t for k in keys)
+    t = _norm(text)
+    keys = ["aujourd'hui", "avant minuit", "dans l'heure", "sous 24h", "sous 48h", "immediatement",
+            "sous 48 h", "maintenant", "des maintenant"]
+    return any(_norm(k) in t for k in keys)
 
 def _asks_credentials(text: str) -> bool:
-    t = text.lower()
-    keys = ["mot de passe", "password", "code sms", "code de vérification", "identité", "pièce d'identité",
-            "identifiant", "se connecter", "vérifier votre compte", "connexion sécurisée"]
-    return any(k in t for k in keys)
+    t = _norm(text)
+    keys = ["mot de passe", "password", "code sms", "code de verification", "identite", "piece d'identite",
+            "identifiant", "se connecter", "verifier votre compte", "connexion securisee",
+            "confirmer votre identite", "confirmer votre compte", "confirmez vos identifiants",
+            "confirmez votre identite", "mettre a jour votre paiement", "mettre a jour votre moyen",
+            "coordonnees bancaires", "renseignez vos coordonnees"]
+    return any(_norm(k) in t for k in keys)
 
 def _asks_money(text: str) -> bool:
-    t = text.lower()
+    t = _norm(text)
     keys = ["paiement", "virement", "remboursement", "facture", "iban", "crypto", "bitcoin", "ethereum",
-            "frais", "taxe", "amende", "droit", "règlement", "régler"]
-    return any(k in t for k in keys)
+            "frais", "taxe", "amende", "droit", "reglement", "regler", "reglez", "payez", "paye ",
+            "pcs", "carte cadeau", "coupon", "paysafecard", "transcash", "recharge", "wallet",
+            "frais de douane", "moyen de paiement"]
+    return any(_norm(k) in t for k in keys)
 
 def _phone_scam(text: str) -> bool:
     t = text.lower()

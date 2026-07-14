@@ -10,3 +10,10 @@
 .tk
 .top
 .xyz
+.cc
+.info
+.rest
+.buzz
+.sbs
+.cfd
+.fit
