@@ -505,6 +505,15 @@ if __name__ == "__main__":
     import argparse, sys
     from pathlib import Path
 
+    # La sortie contient des badges emoji (SUR/DOUTEUX/RISQUE). La console Windows par defaut
+    # (cp1252) ne peut pas les encoder et leve UnicodeEncodeError. On force UTF-8 en sortie pour
+    # que la CLI tourne partout sans PYTHONIOENCODING.
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
+
     parser = argparse.ArgumentParser(description="SCAMShield scorer CLI")
     parser.add_argument("--demo", action="store_true", help="Afficher un aperçu des listes et quitter")
     parser.add_argument("--text", type=str, help="Texte/email brut à évaluer")
