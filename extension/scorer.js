@@ -12,7 +12,8 @@ const WEIGHTS = {
 };
 
 const SUSPICIOUS_TLDS = [".xyz", ".top", ".win", ".click", ".info", ".zip",
-  ".country", ".gq", ".tk", ".ml", ".cf", ".buzz", ".rest", ".lol"];
+  ".country", ".gq", ".tk", ".ml", ".cf", ".buzz", ".rest", ".lol",
+  ".cc", ".cn", ".co", ".ru", ".ga", ".link", ".live", ".icu", ".sbs", ".cfd", ".fit"];
 const SHORTENERS = ["bit.ly", "tiny.cc", "t.co", "short.ly", "goo.gl",
   "is.gd", "cutt.ly", "ow.ly"];
 const BLOCKED_DOMAINS = ["secure-bank-support.com", "amazon-prize.win",
@@ -21,7 +22,13 @@ const BLOCKED_DOMAINS = ["secure-bank-support.com", "amazon-prize.win",
 const DENYLIST = ["cliquez ici", "cliquez vite", "verifiez votre compte",
   "vérifiez votre compte", "compte suspendu", "compte bloqué", "gagné",
   "félicitations", "offre exclusive", "dernier avertissement", "remboursement",
-  "mise à jour de sécurité", "reactivez", "réactivez", "carte cadeau"];
+  "mise à jour de sécurité", "reactivez", "réactivez", "carte cadeau",
+  "vous avez gagné", "vous avez été sélectionné", "réclamez votre lot",
+  "réclamez votre gain", "logiciel espion", "sinon j'envoie", "à vos contacts",
+  "investissement garanti", "investissement crypto", "gains garantis",
+  "profit garanti", "rendement garanti", "places limitées", "support microsoft",
+  "votre ordinateur est infecté", "nouveau numéro", "frais de douane",
+  "appelez le", "crypto garanti"];
 const ALLOWLIST = ["aucune action", "no rush", "pas d'urgence", "à bientôt",
   "merci pour votre confiance", "aucun incident", "rendez-vous confirmé"];
 
@@ -35,25 +42,32 @@ const RE = {
 
 const KW = {
   urgency: ["urgent", "immédiat", "immediat", "48h", "24h", "sans délai",
-    "dernier avertissement", "compte suspendu"],
-  time: ["aujourd'hui", "avant minuit", "dans l'heure", "sous 24h", "immédiatement"],
-  cred: ["mot de passe", "password", "code sms", "code de vérification",
+    "dernier avertissement", "compte suspendu", "sera suspendu", "sera désactivé",
+    "sera bloqué", "sera coupé", "coupure", "a expiré", "dernière chance", "éviter la"],
+  time: ["aujourd'hui", "avant minuit", "dans l'heure", "sous 24h", "sous 48h",
+    "immédiatement", "maintenant", "dès maintenant"],
+  cred: ["mot de passe", "password", "code sms", "code de vérification", "identité",
     "identifiant", "se connecter", "vérifier votre compte", "code reçu",
-    "16 chiffres", "pièce d'identité"],
+    "16 chiffres", "pièce d'identité", "confirmer votre identité", "confirmer votre compte",
+    "confirmez vos identifiants", "confirmez votre identité", "mettre à jour votre paiement",
+    "mettre à jour votre moyen", "coordonnées bancaires", "renseignez vos coordonnées"],
   money: ["paiement", "virement", "remboursement", "facture", "iban", "crypto",
     "bitcoin", "ethereum", "frais", "taxe", "amende", "droit", "règlement",
-    "régler", "western union", "carte cadeau"],
+    "régler", "réglez", "payez", "western union", "carte cadeau", "pcs", "coupon",
+    "paysafecard", "transcash", "recharge", "wallet", "frais de douane", "moyen de paiement"],
 };
 
-const has = (t, list) => list.some((k) => t.includes(k));
-const countHits = (t, list) => list.reduce((n, p) => (t.includes(p) ? n + 1 : n), 0);
+// minuscule + sans accents : les vrais SMS/emails de scam arrivent souvent sans accents.
+const _norm = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const has = (t, list) => list.some((k) => t.includes(_norm(k)));
+const countHits = (t, list) => list.reduce((n, p) => (t.includes(_norm(p)) ? n + 1 : n), 0);
 const domainOf = (u) => {
   try { return new URL(u).hostname.toLowerCase(); } catch { return ""; }
 };
 const baseOf = (d) => d.split(".").slice(-2).join(".");
 
 export function scoreText(text) {
-  const t = (text || "").toLowerCase();
+  const t = _norm(text);
   let score = 0;
   const reasons = [];
   const add = (w, label, sev) => { score += w; reasons.push({ label, sev }); };
