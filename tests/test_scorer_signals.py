@@ -127,14 +127,13 @@ def _grey_zone_scam():
 
 
 def test_llm_off_by_default_is_graceful():
-    # use_llm=True sans clé / sans LLM ne doit pas crasher ni changer le verdict :
-    # le moteur de règles reste maître (dégradation propre = frontière de confiance).
+    # LLM indisponible (endpoint injoignable -> None) : use_llm=True ne doit ni
+    # crasher ni changer le verdict. Le moteur de règles reste maître (dégradation
+    # propre = frontière de confiance). On force None (pas d'appel réseau en test).
     import scamshield.llm as llm
     from scamshield.scorer import score_text
     t = _grey_zone_scam()
     rules_only, _, _ = score_text(t)
-    with_llm_none, _, _ = score_text(t, use_llm=True)  # pas de clé en test -> None
-    # même si une clé traînait, on force le None pour tester la dégradation :
     with_forced_none, r, _ = _monkey(llm, lambda *_a, **_k: None, lambda: score_text(t, use_llm=True))
     assert with_forced_none == rules_only
     assert not any("LLM:" in x for x in r)

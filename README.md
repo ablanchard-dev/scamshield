@@ -85,26 +85,32 @@ The rule engine (`scamshield/scorer.py`) sums weighted, explainable signals:
 
 Every score ships with the reasons that produced it, so each decision is auditable.
 
-## LLM adjudication (experimental)
+## LLM adjudication (experimental, fully local & free)
 
 The rule engine stays the product — transparent, local, explainable. An **optional**
-second stage (`scamshield/llm.py`, off by default) asks a small LLM (Claude Haiku)
-to break ties **only** on grey-zone scores (the `DOUTEUX` band, 25–60). Clear-cut
-messages never touch it, so cost is zero on decided cases and the default behaviour
-is unchanged. If there's no API key or the call fails, it degrades silently and the
-rule score stands — a trust boundary, not a feature toggle.
+second stage (`scamshield/llm.py`, off by default) asks a small LLM to break ties
+**only** on grey-zone scores (the `DOUTEUX` band, 25–60). Clear-cut messages never
+touch it, so cost is zero on decided cases and the default behaviour is unchanged.
+If the endpoint is unreachable or returns bad JSON, it degrades silently and the rule
+score stands — a trust boundary, not a feature toggle.
+
+In keeping with the rest of scamshield (privacy-first, everything local), it defaults
+to a **local Ollama** — no API key, no cost, nothing leaves the machine. Since that's
+an OpenAI-compatible endpoint, the same code also works against a free cloud tier
+(Groq, OpenRouter…) via `SCAMSHIELD_LLM_BASE` / `SCAMSHIELD_LLM_MODEL` / `SCAMSHIELD_LLM_KEY`.
 
 The point isn't the LLM, it's **measuring whether it actually helps**:
 
 ```bash
-ANTHROPIC_API_KEY=... python eval_llm.py   # rules-only vs rules+LLM, on the 22-message battery
+ollama serve && ollama pull llama3.1     # once
+python eval_llm.py                       # rules-only vs rules+LLM, on the 22-message battery
 ```
 
 `eval_llm.py` prints recall / precision / false positives before and after, plus the
-number of grey-zone cases re-adjudicated, latency, and estimated cost. The measured
-numbers go here once run against a live key — including if the honest finding is
-"the rule engine already saturates this benchmark and the LLM adds little." Publishing
-the real number, flattering or not, is the whole exercise.
+number of grey-zone cases re-adjudicated and latency. The measured numbers go here
+once run — including if the honest finding is "the rule engine already saturates this
+benchmark and the LLM mostly sharpens `DOUTEUX`→`RISQUE` confidence." Publishing the
+real number, flattering or not, is the whole exercise.
 
 ## Try it
 
