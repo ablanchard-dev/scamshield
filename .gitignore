@@ -11,3 +11,7 @@ models/*.joblib
 models/train_log.txt
 
 .coverage
+
+# Cles API (LLM adjudication) — ne jamais committer. Copier .env.example -> .env.
+.env
+.env.local

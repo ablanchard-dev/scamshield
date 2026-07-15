@@ -24,6 +24,7 @@ _PROVIDERS = [
     ("CEREBRAS_API_KEY", "https://api.cerebras.ai/v1",                              "llama-3.3-70b"),
     ("GEMINI_API_KEY",   "https://generativelanguage.googleapis.com/v1beta/openai/", "gemini-2.5-flash-lite"),
     ("MISTRAL_API_KEY",  "https://api.mistral.ai/v1",                               "mistral-small-latest"),
+    ("XAI_API_KEY",      "https://api.x.ai/v1",                                     "grok-3-mini"),  # credits requis (pas gratuit)
 ]
 
 

@@ -102,9 +102,13 @@ Override explicitly with `SCAMSHIELD_LLM_BASE` / `SCAMSHIELD_LLM_MODEL` / `SCAMS
 The point isn't the LLM, it's **measuring whether it actually helps**:
 
 ```bash
-export GROQ_API_KEY=...     # free at console.groq.com (or CEREBRAS_/GEMINI_/MISTRAL_API_KEY)
-python eval_llm.py          # rules-only vs rules+LLM, on the 22-message battery
+cp .env.example .env        # then add ONE key — it's gitignored, never committed
+export GROQ_API_KEY=...      # free at console.groq.com (or CEREBRAS_/GEMINI_/MISTRAL_API_KEY)
+python eval_llm.py           # rules-only vs rules+LLM, on the 22-message battery
 ```
+
+You bring your own key — none is bundled. Any OpenAI-compatible endpoint works
+(the free tiers above, or a local Ollama); see `.env.example`.
 
 `eval_llm.py` prints recall / precision / false positives before and after, plus the
 number of grey-zone cases re-adjudicated and latency. The measured numbers go here
