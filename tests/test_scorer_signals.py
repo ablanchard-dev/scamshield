@@ -115,6 +115,53 @@ def test_long_benign_text_no_crash():
     assert 0.0 <= p <= 1.0
 
 
+def _grey_zone_scam():
+    # Un scam qui tombe dans la bande DOUTEUX (25-60) avec les règles seules :
+    # c'est le cas que le LLM est censé arbitrer.
+    from scamshield.scorer import score_text
+    t = ("URGENT maman j'ai casse mon telephone, voici mon nouveau numero. "
+         "Peux-tu m'envoyer 250EUR par PCS, je te rembourse ce soir.")
+    s, _, _ = score_text(t)
+    assert 25.0 <= s < 60.0, f"pre-requis test : attendu zone grise, obtenu {s}"
+    return t
+
+
+def test_llm_off_by_default_is_graceful():
+    # use_llm=True sans clé / sans LLM ne doit pas crasher ni changer le verdict :
+    # le moteur de règles reste maître (dégradation propre = frontière de confiance).
+    import scamshield.llm as llm
+    from scamshield.scorer import score_text
+    t = _grey_zone_scam()
+    rules_only, _, _ = score_text(t)
+    with_llm_none, _, _ = score_text(t, use_llm=True)  # pas de clé en test -> None
+    # même si une clé traînait, on force le None pour tester la dégradation :
+    with_forced_none, r, _ = _monkey(llm, lambda *_a, **_k: None, lambda: score_text(t, use_llm=True))
+    assert with_forced_none == rules_only
+    assert not any("LLM:" in x for x in r)
+
+
+def test_llm_adjudicates_grey_zone_when_available():
+    # Quand le LLM répond "scam" avec confiance, un cas gris est promu RISQUÉ
+    # et la raison LLM est exposée (l'explicabilité continue).
+    import scamshield.llm as llm
+    from scamshield.scorer import score_text
+    t = _grey_zone_scam()
+    fake = {"verdict": "scam", "confidence": 0.9, "reason": "arnaque au proche + PCS"}
+    s, reasons, _ = _monkey(llm, lambda *_a, **_k: fake, lambda: score_text(t, use_llm=True))
+    assert s >= 60.0
+    assert any("LLM: scam" in x for x in reasons)
+
+
+def _monkey(module, replacement, call):
+    # Remplace llm_adjudicate le temps de l'appel (import interne au scorer).
+    orig = module.llm_adjudicate
+    module.llm_adjudicate = replacement
+    try:
+        return call()
+    finally:
+        module.llm_adjudicate = orig
+
+
 def test_dangerous_attachment_flagged():
     # Regression : un nom de fichier normal (facture.exe) doit lever le signal
     # piece-jointe. Un backslash parasite dans le regex le rendait mort (matchait

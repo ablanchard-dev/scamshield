@@ -286,7 +286,7 @@ def _quick_notes(text: str, urls: List[str], reasons: List[str], score: float) -
             deduped.append(n)
     return deduped
 
-def score_text(text: str, media: Optional[Dict[str, Any]] = None) -> Tuple[float, List[str], List[str]]:
+def score_text(text: str, media: Optional[Dict[str, Any]] = None, use_llm: bool = False) -> Tuple[float, List[str], List[str]]:
     """
     Analyse le contenu (texte/email). Retourne (score_normalized, raisons[], notesRapides[])
     Score ~ [0..100+] (plus haut = plus risqué)
@@ -294,6 +294,9 @@ def score_text(text: str, media: Optional[Dict[str, Any]] = None) -> Tuple[float
       - media["audio"]               -> deepfake audio détecté (bool / 0..1)
       - media["video"]               -> deepfake vidéo détecté (bool / 0..1)
       - media["voiceprint_mismatch"] -> empreinte vocale incohérente (bool / 0..1)
+    `use_llm` (défaut False) : si le score de règles tombe dans la zone grise DOUTEUX
+      (25-60), un LLM arbitre le cas (voir scamshield/llm.py). OFF par défaut -> aucune
+      clé requise, CI/tests inchangés. Dégrade proprement si pas de clé/erreur.
     """
     score = 0.0
     reasons: List[str] = []
@@ -463,6 +466,20 @@ def score_text(text: str, media: Optional[Dict[str, Any]] = None) -> Tuple[float
         if voice_mis:
             score += WEIGHTS["voiceprint_mismatch"]
             reasons.append("Empreinte vocale incohérente (voiceprint mismatch)")
+
+    # 10) Adjudication LLM optionnelle — SEULEMENT en zone grise (DOUTEUX 25-60).
+    # Hors zone grise, le moteur de règles reste seul maître : transparence intacte,
+    # coût nul sur les cas tranchés, comportement par défaut inchangé.
+    if use_llm and 25.0 <= score < 60.0:
+        from .llm import llm_adjudicate
+        verdict = llm_adjudicate(t)
+        if verdict:
+            conf = verdict["confidence"]
+            reasons.append(f"LLM: {verdict['verdict']} (conf {conf:.2f}) — {verdict['reason']}")
+            if verdict["verdict"] == "scam" and conf >= 0.5:
+                score = max(score, 60.0)      # promu RISQUÉ
+            elif verdict["verdict"] == "legit" and conf >= 0.5:
+                score = min(score, 24.0)      # ramené SÛR
 
     # Clamp minimal 0
     score = max(0.0, score)
