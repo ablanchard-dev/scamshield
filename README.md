@@ -94,16 +94,16 @@ touch it, so cost is zero on decided cases and the default behaviour is unchange
 If the endpoint is unreachable or returns bad JSON, it degrades silently and the rule
 score stands — a trust boundary, not a feature toggle.
 
-In keeping with the rest of scamshield (privacy-first, everything local), it defaults
-to a **local Ollama** — no API key, no cost, nothing leaves the machine. Since that's
-an OpenAI-compatible endpoint, the same code also works against a free cloud tier
-(Groq, OpenRouter…) via `SCAMSHIELD_LLM_BASE` / `SCAMSHIELD_LLM_MODEL` / `SCAMSHIELD_LLM_KEY`.
+No paid API. It uses the OpenAI-compatible **free tiers** (Groq, Cerebras, Gemini,
+Mistral) and **auto-detects** the first key present in the environment — so if you
+already have one exported, it just works. With no key it falls back to a local Ollama.
+Override explicitly with `SCAMSHIELD_LLM_BASE` / `SCAMSHIELD_LLM_MODEL` / `SCAMSHIELD_LLM_KEY`.
 
 The point isn't the LLM, it's **measuring whether it actually helps**:
 
 ```bash
-ollama serve && ollama pull llama3.1     # once
-python eval_llm.py                       # rules-only vs rules+LLM, on the 22-message battery
+export GROQ_API_KEY=...     # free at console.groq.com (or CEREBRAS_/GEMINI_/MISTRAL_API_KEY)
+python eval_llm.py          # rules-only vs rules+LLM, on the 22-message battery
 ```
 
 `eval_llm.py` prints recall / precision / false positives before and after, plus the

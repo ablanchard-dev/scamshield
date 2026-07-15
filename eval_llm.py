@@ -4,12 +4,12 @@ Mesure honnête sur la batterie monde-réel (22 messages : 11 scams + 11 légiti
 Publie recall / précision / faux positifs / cas gris ré-arbitrés / latence — et le
 chiffre sort tel quel, même s'il est décevant. C'est le but.
 
-100% gratuit : par défaut la couche tape un Ollama local (aucune clé, aucun coût).
-    ollama serve            # dans un terminal
-    ollama pull llama3.1    # ou le modèle de ton choix
+100% gratuit : la couche auto-détecte une clé free-tier présente (Groq / Cerebras /
+Gemini / Mistral — mêmes clés que lumenia), sinon retombe sur un Ollama local.
+    export GROQ_API_KEY=...   # gratuit sur console.groq.com
     python eval_llm.py
 
-Autre modèle / free tier cloud : voir les variables d'env dans scamshield/llm.py.
+Détails / surcharge explicite : voir scamshield/llm.py.
 Sans endpoint joignable, la passe LLM dégrade proprement et l'eval le dit.
 """
 import time

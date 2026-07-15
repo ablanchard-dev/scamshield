@@ -1,29 +1,44 @@
-"""Adjudication LLM optionnelle pour les cas gris de scamshield — 100% gratuite.
+"""Adjudication LLM optionnelle pour les cas gris de scamshield — gratuite.
 
 Le moteur de regles reste LE produit (transparent, explicable, local). Quand son
-score tombe dans la bande ambigue DOUTEUX (25-60), on peut demander a un petit LLM
-de trancher — avec degradation TOTALE : endpoint injoignable, JSON casse -> None,
-et le score de regles reste maitre.
+score tombe dans la bande ambigue DOUTEUX (25-60), un petit LLM tranche — avec
+degradation TOTALE : pas de cle / endpoint injoignable / JSON casse -> None, et le
+score de regles reste maitre.
 
-Fidele a l'ADN de scamshield (privacy-first, tout en local) : par defaut on tape un
-**Ollama local** (http://localhost:11434, aucune cle, aucun cout, rien ne sort de la
-machine). Comme c'est un endpoint **OpenAI-compatible**, la meme fonction marche aussi
-avec un free tier cloud (Groq, OpenRouter...) en surchargeant 3 variables d'env :
+Aucune API payante. On reutilise les **free tiers OpenAI-compatibles** que le
+portfolio utilise deja (memes cles que lumenia) : la fonction DETECTE automatiquement
+la premiere cle presente dans l'environnement (Groq, Cerebras, Gemini, Mistral).
+A defaut de toute cle, elle tombe sur un Ollama local (si un serveur ecoute).
 
-    SCAMSHIELD_LLM_BASE   (defaut http://localhost:11434/v1)
-    SCAMSHIELD_LLM_MODEL  (defaut llama3.1)
-    SCAMSHIELD_LLM_KEY    (optionnel ; Ollama local n'en a pas besoin)
-
-Off par defaut cote scorer (use_llm=False) : la CI et les tests ne demandent rien.
-Zero dependance (urllib stdlib).
+Surcharge explicite possible : SCAMSHIELD_LLM_BASE / SCAMSHIELD_LLM_MODEL /
+SCAMSHIELD_LLM_KEY. Off par defaut cote scorer (use_llm=False). Zero dependance (urllib).
 """
 import json
 import os
 import urllib.request
 
-BASE = os.environ.get("SCAMSHIELD_LLM_BASE", "http://localhost:11434/v1")
-MODEL = os.environ.get("SCAMSHIELD_LLM_MODEL", "llama3.1")
-KEY = os.environ.get("SCAMSHIELD_LLM_KEY", "")
+# Free tiers OpenAI-compatibles, par ordre de preference (limite/vitesse). Modeles
+# petits/rapides : la tache est une classification binaire courte.
+_PROVIDERS = [
+    ("GROQ_API_KEY",     "https://api.groq.com/openai/v1",                          "llama-3.1-8b-instant"),
+    ("CEREBRAS_API_KEY", "https://api.cerebras.ai/v1",                              "llama-3.3-70b"),
+    ("GEMINI_API_KEY",   "https://generativelanguage.googleapis.com/v1beta/openai/", "gemini-2.5-flash-lite"),
+    ("MISTRAL_API_KEY",  "https://api.mistral.ai/v1",                               "mistral-small-latest"),
+]
+
+
+def _resolve():
+    """(base, model, key) : surcharge explicite > 1re cle free-tier presente > Ollama local."""
+    base = os.environ.get("SCAMSHIELD_LLM_BASE")
+    if base:
+        return base, os.environ.get("SCAMSHIELD_LLM_MODEL", ""), os.environ.get("SCAMSHIELD_LLM_KEY", "")
+    for env, prov_base, prov_model in _PROVIDERS:
+        key = os.environ.get(env)
+        if key:
+            return prov_base, os.environ.get("SCAMSHIELD_LLM_MODEL", prov_model), key
+    # Dernier recours : Ollama local (aucune cle). Injoignable -> None plus bas.
+    return "http://localhost:11434/v1", os.environ.get("SCAMSHIELD_LLM_MODEL", "llama3.1"), ""
+
 
 _PROMPT = (
     "Tu es un filtre anti-arnaque pour SMS/emails en francais. On te donne UN message.\n"
@@ -37,26 +52,26 @@ _PROMPT = (
 )
 
 
-def llm_adjudicate(text, model=None, timeout=20):
+def llm_adjudicate(text, timeout=20):
     """Renvoie {'verdict','confidence','reason'} ou None.
 
-    None des qu'il y a le moindre doute (endpoint injoignable, erreur, JSON invalide,
-    verdict hors schema) : le produit retombe TOUJOURS sur les regles, jamais
-    d'exception qui remonte. Frontiere de confiance, on ne la simplifie pas.
+    None des qu'il y a le moindre doute : le produit retombe TOUJOURS sur les regles,
+    jamais d'exception qui remonte. Frontiere de confiance, on ne la simplifie pas.
     """
+    base, model, key = _resolve()
     payload = {
-        "model": model or MODEL,
+        "model": model,
         "messages": [{"role": "user", "content": _PROMPT + (text or "")}],
         "temperature": 0,
         "response_format": {"type": "json_object"},
         "stream": False,
     }
     headers = {"Content-Type": "application/json"}
-    if KEY:
-        headers["Authorization"] = f"Bearer {KEY}"
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
     try:
         req = urllib.request.Request(
-            BASE.rstrip("/") + "/chat/completions",
+            base.rstrip("/") + "/chat/completions",
             data=json.dumps(payload).encode("utf-8"),
             headers=headers,
             method="POST",
