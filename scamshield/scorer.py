@@ -143,7 +143,7 @@ def _extract_attachments(text: str) -> List[str]:
     # naïf : trouve des mots avec extension connue
     found = []
     for ext in SUSPICIOUS_ATTACH:
-        pattern = re.compile(rf"\b[\w\-]+\{re.escape(ext)}\b", re.IGNORECASE)
+        pattern = re.compile(rf"\b[\w\-]+{re.escape(ext)}\b", re.IGNORECASE)
         found += pattern.findall(text)
     return list(set(found))
 

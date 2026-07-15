@@ -113,3 +113,15 @@ def test_long_benign_text_no_crash():
     txt = "Bonjour, " + "tout va bien aujourd'hui. " * 50
     p, _, _ = normalize_score_tuple(score_text(txt))
     assert 0.0 <= p <= 1.0
+
+
+def test_dangerous_attachment_flagged():
+    # Regression : un nom de fichier normal (facture.exe) doit lever le signal
+    # piece-jointe. Un backslash parasite dans le regex le rendait mort (matchait
+    # seulement "xxx\.exe"), le signal ne se declenchait jamais.
+    score_text, _, _ = load_scorer()
+    p_no, _, _ = normalize_score_tuple(score_text("Bonjour, voici le document en piece jointe."))
+    p_att, r_att, _ = normalize_score_tuple(
+        score_text("Bonjour, ouvrez la piece jointe facture.exe pour valider."))
+    assert p_att > p_no
+    assert any("jointe" in x.lower() for x in r_att)
