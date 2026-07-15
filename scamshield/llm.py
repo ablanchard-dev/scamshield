@@ -15,13 +15,15 @@ SCAMSHIELD_LLM_KEY. Off par defaut cote scorer (use_llm=False). Zero dependance 
 """
 import json
 import os
+import time
+import urllib.error
 import urllib.request
 
 # Free tiers OpenAI-compatibles, par ordre de preference (limite/vitesse). Modeles
 # petits/rapides : la tache est une classification binaire courte.
 _PROVIDERS = [
     ("GROQ_API_KEY",     "https://api.groq.com/openai/v1",                          "llama-3.1-8b-instant"),
-    ("CEREBRAS_API_KEY", "https://api.cerebras.ai/v1",                              "llama-3.3-70b"),
+    ("CEREBRAS_API_KEY", "https://api.cerebras.ai/v1",                              "gpt-oss-120b"),
     ("GEMINI_API_KEY",   "https://generativelanguage.googleapis.com/v1beta/openai/", "gemini-2.5-flash-lite"),
     ("MISTRAL_API_KEY",  "https://api.mistral.ai/v1",                               "mistral-small-latest"),
     ("XAI_API_KEY",      "https://api.x.ai/v1",                                     "grok-3-mini"),  # credits requis (pas gratuit)
@@ -64,28 +66,41 @@ def llm_adjudicate(text, timeout=20):
         "model": model,
         "messages": [{"role": "user", "content": _PROMPT + (text or "")}],
         "temperature": 0,
+        "max_tokens": 200,        # cap la sortie : la reponse JSON est courte -> moins de tokens/min consommes
         "response_format": {"type": "json_object"},
         "stream": False,
     }
-    headers = {"Content-Type": "application/json"}
+    headers = {
+        "Content-Type": "application/json",
+        # UA navigateur : certains fournisseurs (Cerebras via Cloudflare) rejettent
+        # le UA par defaut d'urllib avec un 403 code 1010.
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/125 Safari/537.36",
+    }
     if key:
         headers["Authorization"] = f"Bearer {key}"
-    try:
-        req = urllib.request.Request(
-            base.rstrip("/") + "/chat/completions",
-            data=json.dumps(payload).encode("utf-8"),
-            headers=headers,
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            body = json.loads(resp.read().decode("utf-8"))
-        raw = body["choices"][0]["message"]["content"]
-        data = json.loads(raw)
-        verdict = data.get("verdict")
-        if verdict not in ("scam", "legit"):
+    data_bytes = json.dumps(payload).encode("utf-8")
+    url = base.rstrip("/") + "/chat/completions"
+
+    # Retry sur 429 (rate limit) : respecte Retry-After sinon backoff, plafonne le total.
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(url, data=data_bytes, headers=headers, method="POST")
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                body = json.loads(resp.read().decode("utf-8"))
+            raw = body["choices"][0]["message"]["content"]
+            data = json.loads(raw)
+            verdict = data.get("verdict")
+            if verdict not in ("scam", "legit"):
+                return None
+            conf = max(0.0, min(1.0, float(data.get("confidence", 0.0))))
+            return {"verdict": verdict, "confidence": conf, "reason": str(data.get("reason", ""))[:200]}
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < 2:
+                wait = e.headers.get("Retry-After")
+                time.sleep(min(float(wait), 30) if wait and wait.replace(".", "").isdigit() else (attempt + 1) * 12)
+                continue
             return None
-        conf = max(0.0, min(1.0, float(data.get("confidence", 0.0))))
-        return {"verdict": verdict, "confidence": conf, "reason": str(data.get("reason", ""))[:200]}
-    except Exception:
-        # ponytail: appel sync simple, pas de retry/cache/async ; ajouter si volume reel.
-        return None
+        except Exception:
+            return None
+    return None

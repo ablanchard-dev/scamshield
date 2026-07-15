@@ -24,8 +24,8 @@ def band(s):
 
 
 def evaluate(use_llm):
-    """Retourne (recall, precision, faux_positifs, gris, latence_ms_par_appel)."""
-    tp = fp = grey = n_calls = 0
+    """Retourne un dict de métriques."""
+    tp = fp = grey = n_calls = promoted = 0
     t_llm = 0.0
     for corpus, is_scam in ((SCAMS, True), (LEGIT, False)):
         for t in corpus:
@@ -38,32 +38,40 @@ def evaluate(use_llm):
             if use_llm and in_grey:
                 t_llm += time.perf_counter() - t0
                 n_calls += 1
+                # Vrai apport du LLM : un cas gris DOUTEUX passé à RISQUE (durci).
+                if band(s0) == "DOUTEUX" and band(s) == "RISQUE":
+                    promoted += 1
             flagged = band(s) != "SUR"
             if is_scam and flagged:
                 tp += 1
             elif not is_scam and flagged:
                 fp += 1
-    recall = tp / len(SCAMS)
-    precision = tp / (tp + fp) if (tp + fp) else 0.0
-    lat = (t_llm / n_calls * 1000) if n_calls else 0.0
-    return recall, precision, fp, grey, lat
+    return {
+        "recall": tp / len(SCAMS),
+        "precision": tp / (tp + fp) if (tp + fp) else 0.0,
+        "fp": fp,
+        "grey": grey,
+        "promoted": promoted,
+        "lat": (t_llm / n_calls * 1000) if n_calls else 0.0,
+    }
 
 
 def main():
     available = llm_adjudicate("Bonjour, ceci est un simple test.") is not None
     print(f"Endpoint LLM : {'joignable' if available else 'INJOIGNABLE (passe LLM inactive)'}\n")
 
-    r0, p0, fp0, _, _ = evaluate(use_llm=False)
-    r1, p1, fp1, grey, lat = evaluate(use_llm=True)
+    a = evaluate(use_llm=False)
+    b = evaluate(use_llm=True)
 
-    print(f"{'':22} {'REGLES':>8} {'REGLES+LLM':>12}")
-    print(f"{'recall (scams)':22} {r0:>7.0%} {r1:>11.0%}")
-    print(f"{'precision':22} {p0:>7.0%} {p1:>11.0%}")
-    print(f"{'faux positifs':22} {fp0:>8} {fp1:>12}")
-    print(f"\nCas en zone grise (DOUTEUX), candidats a l'arbitrage LLM : {grey}")
+    print(f"{'':26} {'REGLES':>8} {'REGLES+LLM':>12}")
+    print(f"{'recall (scams)':26} {a['recall']:>7.0%} {b['recall']:>11.0%}")
+    print(f"{'precision':26} {a['precision']:>7.0%} {b['precision']:>11.0%}")
+    print(f"{'faux positifs':26} {a['fp']:>8} {b['fp']:>12}")
+    print(f"\nCas en zone grise (DOUTEUX), candidats a l'arbitrage LLM : {b['grey']}")
     if available:
-        print(f"Latence moyenne / appel LLM : ~{lat:.0f} ms")
-        print("Cout : 0 (Ollama local, rien ne sort de la machine)")
+        print(f"Cas gris promus DOUTEUX -> RISQUE par le LLM : {b['promoted']}/{b['grey']}")
+        print(f"Latence moyenne / appel LLM : ~{b['lat']:.0f} ms")
+        print("Cout : 0 (free tier, ex. Cerebras / Groq / Gemini)")
     else:
         print("Passe LLM inactive (endpoint injoignable) : REGLES+LLM == REGLES ci-dessus.")
 

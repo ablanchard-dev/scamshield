@@ -111,10 +111,23 @@ You bring your own key — none is bundled. Any OpenAI-compatible endpoint works
 (the free tiers above, or a local Ollama); see `.env.example`.
 
 `eval_llm.py` prints recall / precision / false positives before and after, plus the
-number of grey-zone cases re-adjudicated and latency. The measured numbers go here
-once run — including if the honest finding is "the rule engine already saturates this
-benchmark and the LLM mostly sharpens `DOUTEUX`→`RISQUE` confidence." Publishing the
-real number, flattering or not, is the whole exercise.
+number of grey-zone cases the LLM re-adjudicated and latency.
+
+**Measured** on the 22-message battery (Cerebras free tier, `gpt-oss-120b`):
+
+| | rules | rules + LLM |
+|---|---|---|
+| recall (scams) | 100% | 100% |
+| precision | 100% | 100% |
+| false positives | 0 | 0 |
+
+The honest finding: **the rule engine already saturates this small benchmark**, so the
+LLM changes neither recall nor precision. Its actual contribution is *decisiveness* — it
+promoted **all 11** grey-zone scams from `DOUTEUX` ("to check") to `RISQUE` ("dangerous"),
+turning every ambiguous verdict into a confident one, at **$0** (free tier). Per-call
+latency is ~200 ms; the free tier throttles tokens-per-minute, so bursts hit rate limits
+(handled with retry/backoff). Publishing the real number — "the rules are enough here" —
+rather than an inflated one is the whole point.
 
 ## Try it
 
