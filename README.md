@@ -136,6 +136,18 @@ streamlit run app/main.py                                          # web demo
 python -m scamshield.scorer --text "Votre colis est retenu, payez 2,99€ : http://exemple"
 ```
 
+Or without installing anything:
+
+```bash
+docker build -t scamshield .
+docker run --rm -p 8501:8501 scamshield                           # web demo on :8501
+docker run --rm scamshield python -m scamshield.scorer --text "..."
+```
+
+The image only adds Streamlit: the rule engine itself is pure standard library, and the
+ML packages in `requirements.txt` are only needed for the `data -> train -> eval`
+pipeline. CI builds the image and scores a real message inside it on every push.
+
 A Chrome extension (`extension/`) ships a lightweight browser re-implementation
 of the core rule-engine signals (`extension/scorer.js`) — a subset of the Python
 engine's signals, with its own hardcoded lists — scoring entirely in the browser,

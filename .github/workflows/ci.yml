@@ -46,3 +46,26 @@ jobs:
           path: |
             coverage.xml
             htmlcov/**
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t scamshield:ci .
+      - name: Scorer works inside the image
+        # Un data/ manquant ne leve pas d'erreur : les listes tombent a vide et tout
+        # devient SUR. On verifie donc le verdict, pas seulement que le build passe.
+        run: |
+          out=$(docker run --rm scamshield:ci python -m scamshield.scorer \
+            --text "Votre colis est retenu, payez 2,99 EUR : http://parcel-fr.cc/pay")
+          echo "$out"
+          echo "$out" | grep -q "DOUTEUX" || { echo "FAIL: expected DOUTEUX (data/ missing from image?)"; exit 1; }
+      - name: Web demo answers on 8501
+        run: |
+          docker run -d --rm -p 8501:8501 --name scamshield-ci scamshield:ci
+          for _ in $(seq 1 30); do
+            curl -sf http://localhost:8501/_stcore/health >/dev/null && break || sleep 2
+          done
+          curl -sf http://localhost:8501/_stcore/health
+          docker stop scamshield-ci
