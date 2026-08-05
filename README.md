@@ -160,8 +160,8 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-GitHub Actions runs the test suite **and** the full `data → train → eval`
-pipeline on every push (badge above).
+23 tests, including the real-world battery above. GitHub Actions runs the test
+suite **and** the full `data → train → eval` pipeline on every push (badge above).
 
 ## License
 
