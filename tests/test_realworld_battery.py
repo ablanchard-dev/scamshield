@@ -50,9 +50,11 @@ def _run():
     return scam_caught, legit_ok
 
 def test_battery():
+    # Le README annonce publiquement 11/11 et 11/11. Le test doit DEFENDRE ce chiffre :
+    # un seuil a ">= 10" laissait passer une regression qui rendait le README faux.
     scam, legit = _run()
-    assert scam >= 10, f"seulement {scam}/11 scams detectes"
-    assert legit >= 10, f"seulement {legit}/11 legit corrects"
+    assert scam == len(SCAMS), f"{scam}/{len(SCAMS)} scams detectes, le README annonce {len(SCAMS)}/{len(SCAMS)}"
+    assert legit == len(LEGIT), f"{legit}/{len(LEGIT)} legit corrects, le README annonce {len(LEGIT)}/{len(LEGIT)} sans faux positif"
 
 if __name__ == "__main__":
     _run()

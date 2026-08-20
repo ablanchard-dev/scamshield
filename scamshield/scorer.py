@@ -12,9 +12,32 @@ from urllib.parse import urlparse
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
-def _load_list(relpath: str) -> List[str]:
+# Fichiers de règles introuvables ou illisibles au chargement. Un détecteur qui
+# perd ses listes ne se met pas à voir moins de menaces : il devient AVEUGLE, et
+# rendait alors 0/100 « SÛR » sur un phishing dont l'expéditeur ET le domaine sont
+# sur liste noire (mesuré le 15/08 : 88/100 « RISQUÉ » → 0/100 « SÛR », zéro raison).
+# On garde donc la trace de ce qui manque au lieu de la perdre dans un `return []`.
+MISSING_DATA: List[str] = []
+
+
+def data_is_complete() -> bool:
+    """Faux si au moins un fichier de règles n'a pas pu être chargé.
+
+    À consulter AVANT d'afficher un verdict rassurant : « je n'ai pas mes règles »
+    ne doit jamais se lire « je n'ai rien trouvé ».
+    """
+    return not MISSING_DATA
+
+
+def _load_list(relpath: str, optional: bool = False) -> List[str]:
+    """`optional=True` pour un fichier dont l'absence est PRÉVUE (un repli existe
+    dans le code). Sans cette distinction, `brands.txt` — absent par conception —
+    aurait déclenché l'alerte de cécité en permanence, et une alerte permanente
+    ne s'entend plus."""
     p = os.path.join(DATA_DIR, relpath)
     if not os.path.exists(p):
+        if not optional:
+            MISSING_DATA.append(relpath)
         return []
     with open(p, "r", encoding="utf-8") as f:
         return [line.strip().lower() for line in f if line.strip()]
@@ -22,11 +45,14 @@ def _load_list(relpath: str) -> List[str]:
 def _load_json(relpath: str) -> Dict[str, float]:
     p = os.path.join(DATA_DIR, relpath)
     if not os.path.exists(p):
+        MISSING_DATA.append(relpath)
         return {}
     with open(p, "r", encoding="utf-8") as f:
         try:
             return json.load(f)
         except Exception:
+            # Fichier présent mais illisible : c'est aussi une cécité, pas un vide.
+            MISSING_DATA.append(relpath)
             return {}
 
 TRUSTED_SENDERS   = _load_list("trusted_senders.txt")
@@ -41,7 +67,7 @@ SUSPICIOUS_ATTACH    = _load_list("suspicious_attachments.txt")
 SUSPICIOUS_TLDS      = _load_list("suspicious_tlds.txt")
 PHONE_PATTERNS       = _load_list("phone_scam_patterns.txt")
 URL_REPUTATION       = _load_json("url_reputation.json")
-KNOWN_BRANDS         = _load_list("brands.txt") or [
+KNOWN_BRANDS         = _load_list("brands.txt", optional=True) or [
     # fallback minimal si data/brands.txt absent
     "microsoft","apple","paypal","amazon","google","facebook","instagram","netflix",
     "orange","sfr","free","la poste","chronopost","dhl","ups","urssaf","impots",
@@ -485,6 +511,14 @@ def score_text(text: str, media: Optional[Dict[str, Any]] = None, use_llm: bool 
     score = max(0.0, score)
     # Normalisation douce (cap à 100, mais peut dépasser si gros cumul)
     score_normalized = min(score, 100.0)
+
+    # Un détecteur privé de ses règles ne « trouve rien » : il ne PEUT rien trouver.
+    # Sans cette ligne, un phishing dont l'expéditeur et le domaine sont sur liste
+    # noire ressortait à 0/100 « SÛR » avec zéro raison affichée.
+    if MISSING_DATA:
+        reasons.insert(0, "ANALYSE INCOMPLÈTE : règles indisponibles ("
+                          + ", ".join(sorted(set(MISSING_DATA))[:4])
+                          + ") — ce score sous-estime le risque")
 
     # Notes rapides
     notes = _quick_notes(t, urls, reasons, score_normalized)

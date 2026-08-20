@@ -3,7 +3,7 @@ import html
 
 import streamlit as st
 
-from scamshield.scorer import score_text
+from scamshield.scorer import score_text, data_is_complete
 
 st.set_page_config(page_title="SCAMShield", layout="centered")
 
@@ -61,6 +61,12 @@ st.markdown(
 
 
 def verdict(s):
+    # Un moteur privé de ses fichiers de règles ne trouve rien parce qu'il ne PEUT
+    # rien trouver : il rendait alors 0/100 « SÛR » sur un phishing dont l'expéditeur
+    # et le domaine sont sur liste noire (88/100 « RISQUÉ » avec les données).
+    # « Je n'ai pas mes règles » ne doit jamais s'afficher comme « c'est sûr ».
+    if not data_is_complete():
+        return "doubt", "DOUTEUX"
     if s < 25:
         return "safe", "SÛR"
     if s < 60:
