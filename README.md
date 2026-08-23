@@ -1,7 +1,7 @@
 # SCAMShield
 
 [![CI](https://github.com/ablanchard-dev/scamshield/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ablanchard-dev/scamshield/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 Scam and phishing detection in text (SMS, e-mails, messages), built around an
